@@ -1,50 +1,39 @@
 package com.interview.platform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "jobs")
+@Document(collection = "jobs")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Job {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String companyName;
 
-    @Column(nullable = false)
     private String type; // EMPLOYEE or INTERN
 
-    @Column(length = 2000, nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private String skillsRequired; // comma-separated values
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruiter_id", nullable = false)
-    @JsonIgnoreProperties({"interviewSessions", "passwordHash", "role", "authorities"})
+    @DBRef(lazy = true)
+    @JsonIgnoreProperties({"passwordHash", "role", "authorities"})
     private User postedBy;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // Constructors
     public Job() {}
 
-    public Job(Long id, String title, String companyName, String type, String description, String skillsRequired, User postedBy, LocalDateTime createdAt) {
+    public Job(String id, String title, String companyName, String type, String description, String skillsRequired, User postedBy, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.companyName = companyName;
@@ -52,7 +41,7 @@ public class Job {
         this.description = description;
         this.skillsRequired = skillsRequired;
         this.postedBy = postedBy;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
 
     // Builder
@@ -61,7 +50,7 @@ public class Job {
     }
 
     public static class JobBuilder {
-        private Long id;
+        private String id;
         private String title;
         private String companyName;
         private String type;
@@ -70,7 +59,7 @@ public class Job {
         private User postedBy;
         private LocalDateTime createdAt;
 
-        public JobBuilder id(Long id) {
+        public JobBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -116,11 +105,11 @@ public class Job {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

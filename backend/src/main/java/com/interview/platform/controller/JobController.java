@@ -79,7 +79,7 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getJobDetails(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getJobDetails(@PathVariable("id") String id) {
         return jobRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -87,7 +87,7 @@ public class JobController {
 
     @GetMapping("/{id}/applications")
     public ResponseEntity<?> getJobApplications(
-            @PathVariable("id") Long id,
+            @PathVariable("id") String id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         User user = userService.findByEmail(userDetails.getUsername())

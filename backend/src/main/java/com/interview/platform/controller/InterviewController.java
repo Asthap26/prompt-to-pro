@@ -6,8 +6,8 @@ import com.interview.platform.entity.Question;
 import com.interview.platform.entity.User;
 import com.interview.platform.entity.Job;
 import com.interview.platform.gateway.NlpGateway;
-import com.interview.platform.repository.QuestionRepository;
 import com.interview.platform.repository.JobRepository;
+import com.interview.platform.repository.InterviewSessionRepository;
 import com.interview.platform.service.AnalyticsService;
 import com.interview.platform.service.EvaluationService;
 import com.interview.platform.service.InterviewService;
@@ -28,25 +28,25 @@ public class InterviewController {
     private final UserService userService;
     private final EvaluationService evaluationService;
     private final AnalyticsService analyticsService;
-    private final QuestionRepository questionRepository;
     private final NlpGateway nlpGateway;
     private final JobRepository jobRepository;
+    private final InterviewSessionRepository sessionRepository;
 
-    public InterviewController(InterviewService interviewService, UserService userService, EvaluationService evaluationService, AnalyticsService analyticsService, QuestionRepository questionRepository, NlpGateway nlpGateway, JobRepository jobRepository) {
+    public InterviewController(InterviewService interviewService, UserService userService, EvaluationService evaluationService, AnalyticsService analyticsService, NlpGateway nlpGateway, JobRepository jobRepository, InterviewSessionRepository sessionRepository) {
         this.interviewService = interviewService;
         this.userService = userService;
         this.evaluationService = evaluationService;
         this.analyticsService = analyticsService;
-        this.questionRepository = questionRepository;
         this.nlpGateway = nlpGateway;
         this.jobRepository = jobRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @PostMapping("/initialize")
     public ResponseEntity<?> initialize(
             @RequestParam(value = "company", required = false) String company,
             @RequestParam(value = "role", required = false) String role,
-            @RequestParam(value = "jobId", required = false) Long jobId,
+            @RequestParam(value = "jobId", required = false) String jobId,
             @RequestParam(value = "resume", required = false) MultipartFile resume,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
@@ -57,7 +57,7 @@ public class InterviewController {
         String finalCompany = company;
         String finalRole = role;
 
-        if (jobId != null) {
+        if (jobId != null && !jobId.isBlank()) {
             job = jobRepository.findById(jobId)
                     .orElseThrow(() -> new IllegalArgumentException("Job position not found"));
             finalCompany = job.getCompanyName();
@@ -82,7 +82,7 @@ public class InterviewController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getSession(
-            @PathVariable("id") Long id,
+            @PathVariable("id") String id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         User user = userService.findByEmail(userDetails.getUsername())
@@ -100,8 +100,8 @@ public class InterviewController {
 
     @PostMapping("/{id}/responses/submit")
     public ResponseEntity<?> submitResponse(
-            @PathVariable("id") Long sessionId,
-            @RequestParam("questionId") Long questionId,
+            @PathVariable("id") String sessionId,
+            @RequestParam("questionId") String questionId,
             @RequestParam(value = "audio", required = false) MultipartFile audioFile,
             @RequestParam(value = "transcript", required = false) String customTranscript,
             @AuthenticationPrincipal UserDetails userDetails
@@ -117,8 +117,10 @@ public class InterviewController {
                 return ResponseEntity.status(403).body("Access denied to this session");
             }
 
-            Question question = questionRepository.findById(questionId)
-                    .orElseThrow(() -> new IllegalArgumentException("Question not found"));
+            Question question = session.getQuestions().stream()
+                    .filter(q -> q.getId().equals(questionId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Question not found in this session"));
 
             String transcript = "";
             if (customTranscript != null && !customTranscript.isBlank()) {
@@ -132,9 +134,9 @@ public class InterviewController {
 
             InterviewResponse response = evaluationService.evaluateResponse(question, transcript);
 
-            InterviewSession updatedSession = interviewService.getSessionById(sessionId).get();
+            // Update session question list
             boolean allAnswered = true;
-            for (Question q : updatedSession.getQuestions()) {
+            for (Question q : session.getQuestions()) {
                 if (q.getId().equals(questionId)) {
                     q.setResponse(response);
                 }
@@ -144,7 +146,9 @@ public class InterviewController {
             }
 
             if (allAnswered) {
-                analyticsService.generateReport(updatedSession);
+                analyticsService.generateReport(session);
+            } else {
+                sessionRepository.save(session);
             }
 
             return ResponseEntity.ok(response);

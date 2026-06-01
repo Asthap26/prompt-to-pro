@@ -30,6 +30,7 @@ export default function InterviewRoom() {
   const [typedResponse, setTypedResponse] = useState('')
   const [liveTranscript, setLiveTranscript] = useState('')
   const [interimTranscript, setInterimTranscript] = useState('')
+  const [recordingFinished, setRecordingFinished] = useState(false)
   const recognitionRef = useRef(null)
 
   // Hooks
@@ -121,6 +122,7 @@ export default function InterviewRoom() {
     try {
       setLiveTranscript('')
       setInterimTranscript('')
+      setRecordingFinished(false)
       await startRecording()
       if (recognitionRef.current) {
         try {
@@ -136,6 +138,7 @@ export default function InterviewRoom() {
 
   const handleStopAndSubmit = async () => {
     stopRecording()
+    setRecordingFinished(true)
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop()
@@ -144,13 +147,6 @@ export default function InterviewRoom() {
       }
     }
   }
-
-  // Watch for audioBlob completion from hook and submit
-  useEffect(() => {
-    if (audioBlob) {
-      submitAnswer(audioBlob, liveTranscript.trim())
-    }
-  }, [audioBlob])
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
@@ -335,7 +331,7 @@ export default function InterviewRoom() {
                   )}
 
                   {/* Interactive Status Display */}
-                  <div className="flex flex-col items-center justify-center py-2">
+                  <div className="flex flex-col items-center justify-center py-2 w-full">
                     {status === 'PROCESSING' ? (
                       <div className="text-center space-y-3 py-4">
                         <Loader2 className="h-8 w-8 animate-spin text-accentEmerald mx-auto" />
@@ -351,8 +347,45 @@ export default function InterviewRoom() {
                           <div className="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] group-hover:scale-105 transition-transform duration-300">
                             <MicOff className="h-6 w-6" />
                           </div>
-                          <span className="text-sm font-semibold text-slate-300 group-hover:text-white">Stop & Submit Response</span>
+                          <span className="text-sm font-semibold text-slate-300 group-hover:text-white">Stop Recording</span>
                         </button>
+                      ) : recordingFinished ? (
+                        <div className="w-full space-y-4 animate-fadeIn">
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                              Review & Edit Your Transcripted Response
+                            </label>
+                            <textarea
+                              rows={4}
+                              value={liveTranscript}
+                              onChange={(e) => setLiveTranscript(e.target.value)}
+                              className="w-full rounded-xl bg-slate-950 border border-slate-800 p-4 text-white text-sm focus:outline-none focus:border-accentEmerald transition-colors resize-none leading-normal"
+                              placeholder="Review your spoken answer here. You can make manual corrections if needed..."
+                            />
+                          </div>
+                          <div className="flex gap-4">
+                            <button
+                              type="button"
+                              onClick={handleStartAudio}
+                              className="flex-1 py-3.5 border border-slate-800 text-slate-300 hover:text-white rounded-xl font-bold hover:bg-slate-850/55 transition-all text-sm uppercase tracking-wider"
+                            >
+                              Re-record
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                await submitAnswer(audioBlob, liveTranscript.trim())
+                                setLiveTranscript('')
+                                setInterimTranscript('')
+                                setRecordingFinished(false)
+                              }}
+                              disabled={!liveTranscript.trim()}
+                              className="flex-1 py-3.5 bg-accentEmerald text-slate-950 rounded-xl font-bold hover:bg-emerald-400 transition-all text-sm uppercase tracking-wider"
+                            >
+                              Submit Answer
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <button 
                           onClick={handleStartAudio}

@@ -4,20 +4,18 @@ import com.interview.platform.entity.EmotionVector;
 import com.interview.platform.entity.InterviewResponse;
 import com.interview.platform.entity.Question;
 import com.interview.platform.gateway.NlpGateway;
-import com.interview.platform.repository.InterviewResponseRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class EvaluationService {
 
-    private final InterviewResponseRepository responseRepository;
     private final NlpGateway nlpGateway;
 
-    public EvaluationService(InterviewResponseRepository responseRepository, NlpGateway nlpGateway) {
-        this.responseRepository = responseRepository;
+    public EvaluationService(NlpGateway nlpGateway) {
         this.nlpGateway = nlpGateway;
     }
 
@@ -44,13 +42,13 @@ public class EvaluationService {
         }
 
         InterviewResponse response = InterviewResponse.builder()
+                .id(UUID.randomUUID().toString())
                 .transcript(transcript)
                 .confidenceScore(confidence)
                 .emotionVector(emotion)
                 .fillerWordCount(fillerCount)
-                .question(question)
                 .build();
 
-        return responseRepository.save(response);
+        return response;
     }
 }

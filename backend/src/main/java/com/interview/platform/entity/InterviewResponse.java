@@ -1,46 +1,29 @@
 package com.interview.platform.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "interview_responses")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class InterviewResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(columnDefinition = "TEXT")
     private String transcript;
 
-    @Column(nullable = false)
     private Integer confidenceScore;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private EmotionVector emotionVector;
 
-    @Column(nullable = false)
     private Integer fillerWordCount;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id", nullable = false, unique = true)
-    @JsonIgnore
-    private Question question;
 
     // Constructors
     public InterviewResponse() {}
 
-    public InterviewResponse(Long id, String transcript, Integer confidenceScore, EmotionVector emotionVector, Integer fillerWordCount, Question question) {
+    public InterviewResponse(String id, String transcript, Integer confidenceScore, EmotionVector emotionVector, Integer fillerWordCount) {
         this.id = id;
         this.transcript = transcript;
         this.confidenceScore = confidenceScore;
         this.emotionVector = emotionVector;
         this.fillerWordCount = fillerWordCount;
-        this.question = question;
     }
 
     // Builder Pattern
@@ -49,14 +32,13 @@ public class InterviewResponse {
     }
 
     public static class InterviewResponseBuilder {
-        private Long id;
+        private String id;
         private String transcript;
         private Integer confidenceScore;
         private EmotionVector emotionVector;
         private Integer fillerWordCount;
-        private Question question;
 
-        public InterviewResponseBuilder id(Long id) {
+        public InterviewResponseBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -81,22 +63,17 @@ public class InterviewResponse {
             return this;
         }
 
-        public InterviewResponseBuilder question(Question question) {
-            this.question = question;
-            return this;
-        }
-
         public InterviewResponse build() {
-            return new InterviewResponse(id, transcript, confidenceScore, emotionVector, fillerWordCount, question);
+            return new InterviewResponse(id, transcript, confidenceScore, emotionVector, fillerWordCount);
         }
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -130,13 +107,5 @@ public class InterviewResponse {
 
     public void setFillerWordCount(Integer fillerWordCount) {
         this.fillerWordCount = fillerWordCount;
-    }
-
-    public Question getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
     }
 }

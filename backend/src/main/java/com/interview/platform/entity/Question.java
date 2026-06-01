@@ -1,45 +1,28 @@
 package com.interview.platform.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "questions")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Question {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false, length = 2000)
     private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private QuestionType type;
 
-    @Column(nullable = false)
     private Integer orderIndex;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_session_id", nullable = false)
-    @JsonIgnore
-    private InterviewSession interviewSession;
-
-    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private InterviewResponse response;
 
     // Constructors
     public Question() {}
 
-    public Question(Long id, String content, QuestionType type, Integer orderIndex, InterviewSession interviewSession, InterviewResponse response) {
+    public Question(String id, String content, QuestionType type, Integer orderIndex, InterviewResponse response) {
         this.id = id;
         this.content = content;
         this.type = type;
         this.orderIndex = orderIndex;
-        this.interviewSession = interviewSession;
         this.response = response;
     }
 
@@ -49,14 +32,13 @@ public class Question {
     }
 
     public static class QuestionBuilder {
-        private Long id;
+        private String id;
         private String content;
         private QuestionType type;
         private Integer orderIndex;
-        private InterviewSession interviewSession;
         private InterviewResponse response;
 
-        public QuestionBuilder id(Long id) {
+        public QuestionBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -76,27 +58,22 @@ public class Question {
             return this;
         }
 
-        public QuestionBuilder interviewSession(InterviewSession interviewSession) {
-            this.interviewSession = interviewSession;
-            return this;
-        }
-
         public QuestionBuilder response(InterviewResponse response) {
             this.response = response;
             return this;
         }
 
         public Question build() {
-            return new Question(id, content, type, orderIndex, interviewSession, response);
+            return new Question(id, content, type, orderIndex, response);
         }
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -122,14 +99,6 @@ public class Question {
 
     public void setOrderIndex(Integer orderIndex) {
         this.orderIndex = orderIndex;
-    }
-
-    public InterviewSession getInterviewSession() {
-        return interviewSession;
-    }
-
-    public void setInterviewSession(InterviewSession interviewSession) {
-        this.interviewSession = interviewSession;
     }
 
     public InterviewResponse getResponse() {

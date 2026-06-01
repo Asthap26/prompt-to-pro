@@ -1,30 +1,29 @@
 package com.interview.platform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "company_profiles")
+@Document(collection = "company_profiles")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CompanyProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String slug;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
     private String promptInjection;
 
     // Constructors
     public CompanyProfile() {}
 
-    public CompanyProfile(Long id, String name, String slug, String promptInjection) {
+    public CompanyProfile(String id, String name, String slug, String promptInjection) {
         this.id = id;
         this.name = name;
         this.slug = slug;
@@ -37,12 +36,12 @@ public class CompanyProfile {
     }
 
     public static class CompanyProfileBuilder {
-        private Long id;
+        private String id;
         private String name;
         private String slug;
         private String promptInjection;
 
-        public CompanyProfileBuilder id(Long id) {
+        public CompanyProfileBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -68,11 +67,11 @@ public class CompanyProfile {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

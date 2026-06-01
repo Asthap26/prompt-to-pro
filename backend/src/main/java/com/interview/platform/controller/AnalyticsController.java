@@ -31,7 +31,7 @@ public class AnalyticsController {
 
     @GetMapping("/reports/{id}")
     public ResponseEntity<?> getReport(
-            @PathVariable("id") Long sessionId,
+            @PathVariable("id") String sessionId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         User user = userService.findByEmail(userDetails.getUsername())

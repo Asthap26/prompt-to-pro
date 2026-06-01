@@ -32,6 +32,9 @@ export default function useAudioRecorder() {
         const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
         const blob = new Blob(audioChunksRef.current, { type: mimeType })
         setAudioBlob(blob)
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(track => track.stop())
+        }
       }
 
       recorder.start(250) // sample slice rate
@@ -53,10 +56,6 @@ export default function useAudioRecorder() {
       mediaRecorderRef.current.stop()
     }
     
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop())
-    }
-
     if (timerRef.current) {
       clearInterval(timerRef.current)
     }

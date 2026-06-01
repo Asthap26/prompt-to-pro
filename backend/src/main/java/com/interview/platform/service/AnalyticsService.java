@@ -2,24 +2,20 @@ package com.interview.platform.service;
 
 import com.interview.platform.entity.*;
 import com.interview.platform.repository.InterviewSessionRepository;
-import com.interview.platform.repository.PerformanceReportRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AnalyticsService {
 
-    private final PerformanceReportRepository reportRepository;
     private final InterviewSessionRepository sessionRepository;
 
-    public AnalyticsService(PerformanceReportRepository reportRepository, InterviewSessionRepository sessionRepository) {
-        this.reportRepository = reportRepository;
+    public AnalyticsService(InterviewSessionRepository sessionRepository) {
         this.sessionRepository = sessionRepository;
     }
 
-    @Transactional
     public PerformanceReport generateReport(InterviewSession session) {
         List<Question> questions = session.getQuestions();
         if (questions == null || questions.isEmpty()) {
@@ -90,18 +86,16 @@ public class AnalyticsService {
         );
 
         PerformanceReport report = PerformanceReport.builder()
+                .id(UUID.randomUUID().toString())
                 .overallScore(overall)
                 .suggestions(suggestions.toString())
                 .skillBreakdown(breakdownJson)
-                .interviewSession(session)
                 .build();
 
-        PerformanceReport savedReport = reportRepository.save(report);
-
         session.setStatus(SessionStatus.COMPLETED);
-        session.setPerformanceReport(savedReport);
+        session.setPerformanceReport(report);
         sessionRepository.save(session);
 
-        return savedReport;
+        return report;
     }
 }

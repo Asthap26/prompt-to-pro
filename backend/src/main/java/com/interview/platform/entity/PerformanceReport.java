@@ -1,40 +1,26 @@
 package com.interview.platform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "performance_reports")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PerformanceReport {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false)
     private Integer overallScore;
 
-    @Column(columnDefinition = "TEXT")
     private String suggestions;
 
-    @Column(columnDefinition = "TEXT")
     private String skillBreakdown; // JSON string containing dimensions
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_session_id", nullable = false, unique = true)
-    @JsonIgnoreProperties("performanceReport")
-    private InterviewSession interviewSession;
 
     // Constructors
     public PerformanceReport() {}
 
-    public PerformanceReport(Long id, Integer overallScore, String suggestions, String skillBreakdown, InterviewSession interviewSession) {
+    public PerformanceReport(String id, Integer overallScore, String suggestions, String skillBreakdown) {
         this.id = id;
         this.overallScore = overallScore;
         this.suggestions = suggestions;
         this.skillBreakdown = skillBreakdown;
-        this.interviewSession = interviewSession;
     }
 
     // Builder Pattern
@@ -43,13 +29,12 @@ public class PerformanceReport {
     }
 
     public static class PerformanceReportBuilder {
-        private Long id;
+        private String id;
         private Integer overallScore;
         private String suggestions;
         private String skillBreakdown;
-        private InterviewSession interviewSession;
 
-        public PerformanceReportBuilder id(Long id) {
+        public PerformanceReportBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -69,22 +54,17 @@ public class PerformanceReport {
             return this;
         }
 
-        public PerformanceReportBuilder interviewSession(InterviewSession interviewSession) {
-            this.interviewSession = interviewSession;
-            return this;
-        }
-
         public PerformanceReport build() {
-            return new PerformanceReport(id, overallScore, suggestions, skillBreakdown, interviewSession);
+            return new PerformanceReport(id, overallScore, suggestions, skillBreakdown);
         }
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -110,13 +90,5 @@ public class PerformanceReport {
 
     public void setSkillBreakdown(String skillBreakdown) {
         this.skillBreakdown = skillBreakdown;
-    }
-
-    public InterviewSession getInterviewSession() {
-        return interviewSession;
-    }
-
-    public void setInterviewSession(InterviewSession interviewSession) {
-        this.interviewSession = interviewSession;
     }
 }

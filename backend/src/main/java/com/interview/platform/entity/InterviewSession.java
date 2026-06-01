@@ -1,63 +1,51 @@
 package com.interview.platform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "interview_sessions")
+@Document(collection = "sessions")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class InterviewSession {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private SessionStatus status;
 
-    @Column(nullable = false)
     private String company;
 
-    @Column(nullable = false)
     private String targetRole;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("interviewSessions")
+    @DBRef(lazy = true)
+    @JsonIgnoreProperties({"passwordHash", "role", "authorities"})
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id")
+    @DBRef(lazy = true)
     @JsonIgnoreProperties({"postedBy"})
     private Job job;
 
-    @OneToMany(mappedBy = "interviewSession", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("orderIndex ASC")
+    // Embedded questions list (no DBRef, stored nested in MongoDB session document)
     private List<Question> questions = new java.util.ArrayList<>();
 
-    @OneToOne(mappedBy = "interviewSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Embedded performance report (no DBRef, stored nested in MongoDB session document)
     private PerformanceReport performanceReport;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     // Constructors
     public InterviewSession() {}
 
-    public InterviewSession(Long id, SessionStatus status, String company, String targetRole, LocalDateTime createdAt, User user, Job job, List<Question> questions, PerformanceReport performanceReport) {
+    public InterviewSession(String id, SessionStatus status, String company, String targetRole, LocalDateTime createdAt, User user, Job job, List<Question> questions, PerformanceReport performanceReport) {
         this.id = id;
         this.status = status;
         this.company = company;
         this.targetRole = targetRole;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.user = user;
         this.job = job;
         this.questions = questions != null ? questions : new java.util.ArrayList<>();
@@ -70,7 +58,7 @@ public class InterviewSession {
     }
 
     public static class InterviewSessionBuilder {
-        private Long id;
+        private String id;
         private SessionStatus status;
         private String company;
         private String targetRole;
@@ -80,7 +68,7 @@ public class InterviewSession {
         private List<Question> questions = new java.util.ArrayList<>();
         private PerformanceReport performanceReport;
 
-        public InterviewSessionBuilder id(Long id) {
+        public InterviewSessionBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -131,11 +119,11 @@ public class InterviewSession {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

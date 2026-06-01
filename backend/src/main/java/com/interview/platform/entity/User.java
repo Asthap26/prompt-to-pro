@@ -2,7 +2,9 @@ package com.interview.platform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,39 +12,29 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(unique = true, nullable = false)
+    @Indexed(unique = true)
     private String email;
 
-    @Column(nullable = false)
     @JsonIgnore
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<InterviewSession> interviewSessions = new java.util.ArrayList<>();
 
     // Constructors
     public User() {}
 
-    public User(Long id, String email, String passwordHash, Role role, List<InterviewSession> interviewSessions) {
+    public User(String id, String email, String passwordHash, Role role) {
         this.id = id;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
-        this.interviewSessions = interviewSessions != null ? interviewSessions : new java.util.ArrayList<>();
     }
 
     // Builder Pattern
@@ -51,13 +43,12 @@ public class User implements UserDetails {
     }
 
     public static class UserBuilder {
-        private Long id;
+        private String id;
         private String email;
         private String passwordHash;
         private Role role;
-        private List<InterviewSession> interviewSessions = new java.util.ArrayList<>();
 
-        public UserBuilder id(Long id) {
+        public UserBuilder id(String id) {
             this.id = id;
             return this;
         }
@@ -77,22 +68,17 @@ public class User implements UserDetails {
             return this;
         }
 
-        public UserBuilder interviewSessions(List<InterviewSession> interviewSessions) {
-            this.interviewSessions = interviewSessions;
-            return this;
-        }
-
         public User build() {
-            return new User(id, email, passwordHash, role, interviewSessions);
+            return new User(id, email, passwordHash, role);
         }
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -118,14 +104,6 @@ public class User implements UserDetails {
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    public List<InterviewSession> getInterviewSessions() {
-        return interviewSessions;
-    }
-
-    public void setInterviewSessions(List<InterviewSession> interviewSessions) {
-        this.interviewSessions = interviewSessions;
     }
 
     // UserDetails Implementation

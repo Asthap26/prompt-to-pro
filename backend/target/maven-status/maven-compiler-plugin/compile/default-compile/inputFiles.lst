@@ -11,10 +11,8 @@
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/entity/Job.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/service/UserService.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/controller/AnalyticsController.java
-/Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/repository/QuestionRepository.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/config/JwtAuthFilter.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/controller/AuthController.java
-/Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/repository/InterviewResponseRepository.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/controller/CompanyController.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/config/JwtService.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/entity/SessionStatus.java
@@ -35,6 +33,5 @@
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/entity/User.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/entity/CompanyProfile.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/service/ResumeParserService.java
-/Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/repository/PerformanceReportRepository.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/entity/QuestionType.java
 /Users/asthapatel/prompt-to-pro/backend/src/main/java/com/interview/platform/config/CustomUserDetailsService.java
